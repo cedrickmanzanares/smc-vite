@@ -12,6 +12,7 @@ import OurStoryTab from 'src/CMS/OurStoryTab/ourstorytab';
 import Marquee from 'src/CMS/Marquee/Marquee';
 import SingleImage from 'src/CMS/SingleImage/SingleImage';
 import FullPageBanner from 'src/CMS/FullPageBanner/fullpagebanner';
+import MainBanner from 'src/CMS/MainBanner/MainBanner';
 
 export default function Builder() {
 	// const location = useLocation();
@@ -71,9 +72,6 @@ export default function Builder() {
 				})}
 			<div style={{ height: '100vh' }}></div>
 			<div style={{ height: '100vh' }}></div>
-			<div style={{ height: '100vh' }}></div>
-			<div style={{ height: '100vh' }}></div>
-			<div style={{ height: '100vh' }}></div>
 		</Fade>
 	);
 }
@@ -112,6 +110,74 @@ function Widgets({ widgets, hasColumn }) {
 					);
 				}
 
+				console.log('Homepage Banner');
+				if (widget.widgets_name === 'Homepage Banner') {
+					let video;
+					let images = [];
+
+					children.forEach((child) => {
+						if (child.elements_tag === 'video')
+							video = child.elements_attributes;
+						else if (child.elements_tag === 'div') {
+							child.api_childrens.forEach((element) => {
+								images.push(element.elements_attributes);
+							});
+						}
+					});
+
+					let time = [];
+					let bg = [];
+					widget.widgets_class.forEach((classes) => {
+						if (classes.includes('time'))
+							time.push(classes.split('time_').pop());
+						if (classes.includes('color'))
+							bg.push(classes.split('color_').pop());
+					});
+
+					let today = new Date();
+					let show = false;
+
+					let imageTimeStart = new Date(
+						today.getFullYear(),
+						today.getMonth(),
+						today.getDate(),
+						time[0].split(':')[0],
+						time[0].split(':')[1]
+					);
+					let imageTimeEnd = new Date(
+						today.getFullYear(),
+						today.getMonth(),
+						today.getDate(),
+						time[1].split(':')[0],
+						time[1].split(':')[1]
+					);
+
+					if (imageTimeEnd > imageTimeStart) {
+						if (today >= imageTimeStart && today <= imageTimeEnd) {
+							show = true;
+						}
+					} else if (imageTimeStart > imageTimeEnd) {
+						if (imageTimeEnd >= today || today >= imageTimeStart) {
+							show = true;
+						}
+					}
+
+					// console.log(
+					// 	show,
+					// 	today.toTimeString(),
+					// 	imageTimeStart.toTimeString(),
+					// 	imageTimeEnd.toTimeString()
+					// );
+
+					console.log(
+						`imageTimeEnd ${time[1]} > imageTimeStart ${time[0]}`,
+						imageTimeEnd > imageTimeStart
+					);
+					console.log(today >= imageTimeStart && today <= imageTimeEnd);
+
+					return show && <MainBanner key={key} images={images} video={video} />;
+				}
+
 				if (widget.widgets_name === 'Page Banner') {
 					let image = children[0].elements_attributes.src;
 					let title = children[1].elements_slot;
@@ -132,7 +198,6 @@ function Widgets({ widgets, hasColumn }) {
 				}
 
 				if (widget.widgets_name === 'Section Title') {
-					console.log(children[1]);
 					let titleClass = children[0].elements_class
 						? children[0].elements_class.join(' ')
 						: '';
@@ -157,7 +222,6 @@ function Widgets({ widgets, hasColumn }) {
 						? children[0].elements_slot
 						: '';
 
-					console.log(children[0].elements_class);
 					return (
 						<Column key={key} columnClasses={childrenClasses}>
 							{parse(content)}
@@ -223,8 +287,6 @@ function Widgets({ widgets, hasColumn }) {
 				}
 
 				if (widget.widgets_name === 'Banner - Full Page') {
-					console.log('widgetClasses', widgetClasses);
-
 					return (
 						<FullPageBanner
 							key={key}
@@ -235,11 +297,6 @@ function Widgets({ widgets, hasColumn }) {
 				}
 
 				if (widget.widgets_name === 'MV Item') {
-					console.log('children[0]', children[0]);
-					console.log('children[1]', children[1]);
-					console.log('children[2]', children[2]);
-					console.log('children[3]', children[3]);
-
 					let elementClasses_1 = children[1].elements_class
 						? children[1].elements_class.join(' ')
 						: '';
@@ -304,7 +361,6 @@ function Widgets({ widgets, hasColumn }) {
 				}
 
 				if (our_story_tabs.length) {
-					console.log(our_story_tabs);
 					<OurStoryTab />;
 				}
 			})}
