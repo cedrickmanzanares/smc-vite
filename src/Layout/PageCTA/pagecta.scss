@@ -1,0 +1,71 @@
+.pageCTA {
+	position: relative;
+	overflow: hidden;
+	border-bottom-left-radius: 5rem;
+	border-bottom-right-radius: 5rem;
+	background-color: #ffffff;
+	z-index: 10;
+}
+
+.pageCTA .heading-2 {
+	text-align: center;
+	width: 768px;
+	max-width: 100%;
+	position: absolute;
+	color: white;
+	top: 25%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	padding: 2rem;
+}
+
+.pageCTA .container-fluid-width {
+	padding: 0;
+	width: 100%;
+}
+
+.cta-images {
+	position: relative;
+	min-height: 600px;
+	height: 50vh;
+	z-index: 1;
+}
+
+.cta-images img {
+	position: absolute;
+	top: 0%;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center center;
+	transform-origin: center bottom;
+}
+
+.pageCTA-btn {
+	font-size: 1.25rem;
+	padding-top: 0.8rem;
+	padding-bottom: 0.8rem;
+	position: absolute;
+	z-index: 2;
+	left: 50%;
+	top: 75%;
+	transform: translate(-50%, -50%);
+	span {
+		white-space: nowrap;
+	}
+}
+
+@media only screen and (max-width: 450px) {
+	.pageCTA {
+		border-bottom-left-radius: 3rem;
+		border-bottom-right-radius: 3rem;
+		.heading-2 {
+			transform: translate(-50%, -50%) !important;
+		}
+	}
+
+	.cta-images {
+		min-height: 0;
+		height: 35vh;
+	}
+}
