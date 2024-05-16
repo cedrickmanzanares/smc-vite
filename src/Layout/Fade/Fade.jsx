@@ -9,7 +9,6 @@ import { ThemeContext } from 'src/App';
 export default function Fade({ children, customStyle }) {
 	const { smcTheme } = useContext(ThemeContext);
 
-	console.log(smcTheme);
 	useEffect(() => {
 		const lenis = new Lenis();
 

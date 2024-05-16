@@ -38,9 +38,20 @@ export const useGetMenuNew = (setFakePreload) => {
 					return res.json();
 				})
 				.then((data) => {
-					let filteredMenu = data.filter(
-						(item) => item.page_is_published && item.page_slug !== 'home'
-					);
+					let filteredMenu = data.filter((item) => {
+						// console.log(item);
+						// let filteredNavigation = item.navigations.map((item) => {
+						// 	let filteredNavigation = item.navigations.map((item) => {
+						// 		return item.page_is_published;
+						// 	});
+
+						// 	item.navigations = filteredNavigation;
+						// 	return item.page_is_published;
+						// });
+
+						// item.navigations = filteredNavigation;
+						return item.page_is_published && item.page_slug !== 'home';
+					});
 					setMenu((prev) => (prev = filteredMenu));
 					setFakePreload(true);
 				});

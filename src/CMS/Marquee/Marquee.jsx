@@ -33,21 +33,21 @@ export default function Marquee({ images, widgetClasses }) {
 						gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr',
 					}}>
 					{images.map((image) => {
-						console.log(image);
+						let img = image.elements_attributes;
 						return (
-							<div>
+							<div key={`1_${image.element_code}`}>
 								<SingleParallax scrollYProgress_start={scrollYProgress_start1}>
-									<img src={image.src} />
+									<img src={img.src} alt={img.alt} />
 								</SingleParallax>
 							</div>
 						);
 					})}
 					{images.map((image) => {
-						console.log(image);
+						let img = image.elements_attributes;
 						return (
-							<div>
+							<div key={`2_${image.element_code}`}>
 								<SingleParallax scrollYProgress_start={scrollYProgress_start1}>
-									<img src={image.src} />
+									<img src={img.src} alt={img.alt} />
 								</SingleParallax>
 							</div>
 						);

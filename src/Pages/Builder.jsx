@@ -5,7 +5,7 @@ import Section from 'src/CMS/Section/Section';
 import Fade from 'src/Layout/Fade/Fade';
 import Footer from 'src/Layout/Footer/footer';
 import { useGetContent } from 'src/data/data';
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import parse from 'html-react-parser';
 import StackedImages from 'src/CMS/StackedImages/stackedimages';
 import OurStoryTab from 'src/CMS/OurStoryTab/ourstorytab';
@@ -13,18 +13,26 @@ import Marquee from 'src/CMS/Marquee/Marquee';
 import SingleImage from 'src/CMS/SingleImage/SingleImage';
 import FullPageBanner from 'src/CMS/FullPageBanner/fullpagebanner';
 import MainBanner from 'src/CMS/MainBanner/MainBanner';
+import { Link, useLocation } from 'react-router-dom';
+import { ThemeContext } from 'src/App';
+import VideoContent from 'src/CMS/VideoContent/Video';
 
 export default function Builder() {
 	// const location = useLocation();
 	// const sections = useState([]);
 
 	const { title, sections } = useGetContent();
+	const location = useLocation();
+
+	useEffect(() => {
+		console.log(location.pathname);
+	}, [location]);
 
 	return (
 		<Fade>
 			{sections.length !== 0 &&
 				sections.map((section) => {
-					console.log(section);
+					// console.log(section);
 					let widgets = section.api_widgets;
 
 					let sectionClasses = section.section_class
@@ -44,7 +52,7 @@ export default function Builder() {
 
 					let hasColumn = sectionClasses.includes('column');
 
-					if (!hasColumn) sectionClasses += 'column-1';
+					if (!hasColumn) sectionClasses += ' column-1';
 
 					if (!sectionClasses.includes('skip-section')) {
 						return (
@@ -78,6 +86,47 @@ export default function Builder() {
 
 function Widgets({ widgets, hasColumn }) {
 	let our_story_tabs = [];
+
+	const location = useLocation();
+	const getTheme = () => {
+		let test = location.pathname.split('/');
+	};
+
+	const createCMSElement = ({
+		api_childrens,
+		elements_tag,
+		elements_attributes,
+		element_code,
+		elements_class,
+		elements_slot,
+	}) => {
+		console.log('Create Element');
+		console.log('Create Element');
+		// let element = {};
+		// element.tag = e.elements_tag;
+		// element.attributes = {
+		// 	...e.elements_attributes,
+		// 	className: e.elements_class,
+		// };
+
+		return React.createElement(
+			elements_tag,
+			{
+				...elements_attributes,
+				key: element_code,
+				className: elements_class,
+			},
+			<>
+				{elements_slot && elements_slot}
+				{api_childrens &&
+					api_childrens.map((children) => {
+						console.log('Start Recursion');
+						return createCMSElement(children);
+					})}
+			</>
+		);
+	};
+
 	return (
 		<>
 			{widgets.map((widget) => {
@@ -110,7 +159,6 @@ function Widgets({ widgets, hasColumn }) {
 					);
 				}
 
-				console.log('Homepage Banner');
 				if (widget.widgets_name === 'Homepage Banner') {
 					let video;
 					let images = [];
@@ -142,14 +190,16 @@ function Widgets({ widgets, hasColumn }) {
 						today.getMonth(),
 						today.getDate(),
 						time[0].split(':')[0],
-						time[0].split(':')[1]
+						time[0].split(':')[1],
+						0
 					);
 					let imageTimeEnd = new Date(
 						today.getFullYear(),
 						today.getMonth(),
 						today.getDate(),
 						time[1].split(':')[0],
-						time[1].split(':')[1]
+						time[1].split(':')[1],
+						59
 					);
 
 					if (imageTimeEnd > imageTimeStart) {
@@ -169,11 +219,11 @@ function Widgets({ widgets, hasColumn }) {
 					// 	imageTimeEnd.toTimeString()
 					// );
 
-					console.log(
-						`imageTimeEnd ${time[1]} > imageTimeStart ${time[0]}`,
-						imageTimeEnd > imageTimeStart
-					);
-					console.log(today >= imageTimeStart && today <= imageTimeEnd);
+					// console.log(
+					// 	`imageTimeEnd ${time[1]} > imageTimeStart ${time[0]}`,
+					// 	imageTimeEnd > imageTimeStart
+					// );
+					// console.log(today >= imageTimeStart && today <= imageTimeEnd);
 
 					return show && <MainBanner key={key} images={images} video={video} />;
 				}
@@ -185,6 +235,7 @@ function Widgets({ widgets, hasColumn }) {
 					subtitle = children[2] ? children[2].elements_slot : '';
 					let noBg = widgetClasses.includes('no-bg') ? true : false;
 
+					// widgetClasses += ` ${theme}`;
 					return (
 						<PageBanner
 							key={key}
@@ -225,6 +276,7 @@ function Widgets({ widgets, hasColumn }) {
 					return (
 						<Column key={key} columnClasses={childrenClasses}>
 							{parse(content)}
+							{}
 						</Column>
 					);
 				}
@@ -234,6 +286,25 @@ function Widgets({ widgets, hasColumn }) {
 						<Column key={key}>
 							<h2>{children[0].elements_slot}</h2>
 							{parse(children[1].elements_slot)}
+
+							<p>
+								{children[1].api_childrens.map((child) => {
+									console.log(child);
+									if (child.elements_name === 'Hyperlink') {
+										let elementClasses = child.elements_class
+											? child.elements_class.join(' ')
+											: '';
+
+										return (
+											<Link
+												className={elementClasses}
+												to={child.elements_attributes.src}>
+												{child.elements_attributes.value}
+											</Link>
+										);
+									}
+								})}
+							</p>
 						</Column>
 					);
 				}
@@ -278,12 +349,30 @@ function Widgets({ widgets, hasColumn }) {
 
 				if (widget.widgets_name === 'Image - Marquee') {
 					let images = [];
-					children.forEach((image) => images.push(image.elements_attributes));
+					children.forEach((image) => images.push(image));
 					return (
 						<Column key={key}>
 							<Marquee images={images} widgetClasses={widgetClasses} />
 						</Column>
 					);
+				}
+
+				if (widget.widgets_name === 'Video Content') {
+					console.log('video', children);
+					let type = children[0].elements_attributes.type;
+					if (type === 'youtube') {
+						return (
+							<React.Fragment key={key}>
+								{parse(children[0].elements_attributes.embedded_code)}
+							</React.Fragment>
+						);
+					}
+
+					let src = children[0].elements_attributes.src;
+
+					let poster = children[0].api_childrens[0].elements_attributes.src;
+
+					return <VideoContent key={key} src={src} poster={poster} />;
 				}
 
 				if (widget.widgets_name === 'Banner - Full Page') {
@@ -336,24 +425,43 @@ function Widgets({ widgets, hasColumn }) {
 				}
 
 				if (widget.widgets_name === 'Business Item') {
+					let image = children[0];
+					let type = children[1];
+					let title = children[2];
+					let desc = children[3];
+					let link = children[4];
+
+					console.log('type', type);
 					return (
 						<Column key={key}>
-							<div class='business-item'>
-								<div class='img-container'>
+							<div className='business-item'>
+								<div className='img-container'>
 									<img
-										src={children[0].elements_attributes.src}
-										alt={children[0].elements_attributes.alt}
+										src={image.elements_attributes.src}
+										alt={image.elements_attributes.alt}
 									/>
 								</div>
-								<div class='desc-container'>
-									<h2 class='heading-4'>{children[1].elements_slot}</h2>
-									{children[2].elements_slot &&
-										parse(children[2].elements_slot)}
+								<div className='desc-container'>
+									{type.api_childrens.length && (
+										<div className='business-type'>
+											{createCMSElement(type)}
+										</div>
+									)}
+									{title.elements_slot && (
+										<h3 className='business-name heading-3'>
+											{title.elements_slot}
+										</h3>
+									)}
+
+									{desc.elements_slot && parse(desc.elements_slot)}
 									{}
 								</div>
 							</div>
 						</Column>
 					);
+				}
+
+				if (widget.widgets_name === 'Custom Widget') {
 				}
 
 				if (widget.widgets_name === 'Our Story Tabs - Test') {

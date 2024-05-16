@@ -9,4 +9,7 @@ export default defineConfig({
 			src: '/src',
 		},
 	},
+	build: {
+		assetsDir: 'smc-assets',
+	},
 });
