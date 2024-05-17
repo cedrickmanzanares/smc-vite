@@ -406,6 +406,7 @@ a {
 @import '../CMS/FullPageBanner/fullpagebanner.scss';
 @import '../CMS/MainBanner/MainBanner.scss';
 @import '../CMS/VideoContent/Video.scss';
+@import '../CMS/PDFWidget/pdfwidget.scss';
 
 // @import '../Components/SampleVideo/sample-video.scss';
 
@@ -418,7 +419,6 @@ a {
 
 // @import '../CMS/PageTitle/pagetitle.scss';
 // @import '../CMS/PDFItem/pdfitem.scss';
-// @import '../CMS/PDFWidget/pdfwidget.scss';
 
 // @import '../CMS/TextGradient/TextGradient.scss';
 // @import '../CMS/ParallaxGrid/parallaxgrid.scss';
@@ -725,6 +725,14 @@ a {
 	grid-template-columns: minmax(50%, 1fr) 1fr;
 	gap: var(--gap-padding);
 	row-gap: 0;
+}
+
+.smc-blue {
+	.business-item {
+		.business-name {
+			color: var(--base-blue);
+		}
+	}
 }
 .business-item {
 	container-type: inline-size;

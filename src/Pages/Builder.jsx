@@ -16,7 +16,11 @@ import MainBanner from 'src/CMS/MainBanner/MainBanner';
 import { Link, useLocation } from 'react-router-dom';
 import { ThemeContext } from 'src/App';
 import VideoContent from 'src/CMS/VideoContent/Video';
+import PDFWidget from 'src/CMS/PDFWidget/PDFWidget';
 
+import { PiCaretCircleRight } from 'react-icons/pi';
+
+const LinkElementNames = ['Button Stacked', 'React Link'];
 export default function Builder() {
 	// const location = useLocation();
 	// const sections = useState([]);
@@ -93,6 +97,7 @@ function Widgets({ widgets, hasColumn }) {
 	};
 
 	const createCMSElement = ({
+		elements_name,
 		api_childrens,
 		elements_tag,
 		elements_attributes,
@@ -100,8 +105,16 @@ function Widgets({ widgets, hasColumn }) {
 		elements_class,
 		elements_slot,
 	}) => {
-		console.log('Create Element');
-		console.log('Create Element');
+		if (LinkElementNames.includes(elements_name)) elements_tag = Link;
+		if (elements_name === 'Icon') {
+			if (!elements_slot) return;
+			elements_tag = getIcon(elements_slot);
+			elements_attributes = {
+				...elements_attributes,
+				size: elements_attributes.size ? elements_attributes.size : '1.75rem',
+			};
+		}
+
 		// let element = {};
 		// element.tag = e.elements_tag;
 		// element.attributes = {
@@ -114,7 +127,7 @@ function Widgets({ widgets, hasColumn }) {
 			{
 				...elements_attributes,
 				key: element_code,
-				className: elements_class,
+				className: elements_class ? elements_class.join(' ') : '',
 			},
 			<>
 				{elements_slot && elements_slot}
@@ -125,6 +138,10 @@ function Widgets({ widgets, hasColumn }) {
 					})}
 			</>
 		);
+	};
+
+	const getIcon = (elements_slot) => {
+		if (elements_slot === 'PiCaretCircleRight') return PiCaretCircleRight;
 	};
 
 	return (
@@ -283,7 +300,7 @@ function Widgets({ widgets, hasColumn }) {
 
 				if (widget.widgets_name === 'Text Column') {
 					return (
-						<Column key={key}>
+						<Column key={key} columnClasses={widgetClasses}>
 							<h2>{children[0].elements_slot}</h2>
 							{parse(children[1].elements_slot)}
 
@@ -461,7 +478,35 @@ function Widgets({ widgets, hasColumn }) {
 					);
 				}
 
+				if (widget.widgets_name === 'PDF Widget') {
+					let files = children[0];
+					let title = children[1];
+					// let headingSize = title.elements_class
+					// 	? title.elements_class.join(' ')
+					// 	: null;
+					let link = children[2];
+
+					console.log('files', files);
+					console.log('title', title);
+					console.log('link', link);
+					console.log('widgetClasses', widgetClasses);
+					return (
+						<Column key={key} className={widgetClasses}>
+							<PDFWidget
+								// headingSize={headingSize}
+								title={title.elements_slot}
+								// link={'/disclosures/inner'}
+							/>
+						</Column>
+					);
+				}
 				if (widget.widgets_name === 'Custom Widget') {
+					console.log(children);
+					return (
+						<Column key={key}>
+							{children.map((child) => createCMSElement(child))}
+						</Column>
+					);
 				}
 
 				if (widget.widgets_name === 'Our Story Tabs - Test') {
