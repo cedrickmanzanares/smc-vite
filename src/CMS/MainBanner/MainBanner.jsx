@@ -6,6 +6,8 @@ import { useGetBannerData } from 'src/data/data';
 import { PreloadContext } from 'src/App';
 
 export default function MainBanner({ images, video }) {
+	console.log('images', images);
+	console.log('video', video);
 	const { fakePreload, doneIntro } = useContext(PreloadContext);
 	// const { images, video } = useGetBannerData();
 

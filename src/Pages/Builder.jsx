@@ -5,7 +5,7 @@ import Section from 'src/CMS/Section/Section';
 import Fade from 'src/Layout/Fade/Fade';
 import Footer from 'src/Layout/Footer/footer';
 import { useGetContent } from 'src/data/data';
-import React, { useContext, useEffect } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import parse from 'html-react-parser';
 import StackedImages from 'src/CMS/StackedImages/stackedimages';
 import OurStoryTab from 'src/CMS/OurStoryTab/ourstorytab';
@@ -19,8 +19,13 @@ import VideoContent from 'src/CMS/VideoContent/Video';
 import PDFWidget from 'src/CMS/PDFWidget/PDFWidget';
 
 import { PiCaretCircleRight } from 'react-icons/pi';
+import ImageSlider from 'src/CMS/ImageSlider/ImageSlider';
+
+import SustainabilitySection from 'src/CMS/SustainabilitySection/SustainabilitySection';
+import OurBusinesses from 'src/CMS/OurBusinesses/OurBusinesses';
 
 const LinkElementNames = ['Button Stacked', 'React Link'];
+
 export default function Builder() {
 	// const location = useLocation();
 	// const sections = useState([]);
@@ -65,7 +70,11 @@ export default function Builder() {
 								sectionClass={sectionClasses}
 								containerClass={containerClasses}>
 								{widgets.length !== 0 && (
-									<Widgets widgets={widgets} hasColumn={hasColumn} />
+									<Widgets
+										keyWidget={`widgets_${section.section_code}`}
+										widgets={widgets}
+										hasColumn={hasColumn}
+									/>
 								)}
 							</Section>
 						);
@@ -74,7 +83,7 @@ export default function Builder() {
 							<React.Fragment key={section.section_code}>
 								{widgets.length !== 0 && (
 									<Widgets
-										key={section.section_code}
+										keyWidget={`widgets_${section.section_code}`}
 										widgets={widgets}
 										hasColumn={hasColumn}
 									/>
@@ -82,13 +91,11 @@ export default function Builder() {
 							</React.Fragment>
 						);
 				})}
-			<div style={{ height: '100vh' }}></div>
-			<div style={{ height: '100vh' }}></div>
 		</Fade>
 	);
 }
 
-function Widgets({ widgets, hasColumn }) {
+function Widgets({ widgets, hasColumn, keyWidget }) {
 	let our_story_tabs = [];
 
 	const location = useLocation();
@@ -114,6 +121,13 @@ function Widgets({ widgets, hasColumn }) {
 				size: elements_attributes.size ? elements_attributes.size : '1.75rem',
 			};
 		}
+		if (elements_name === 'Paragraph') {
+			return (
+				<React.Fragment key={element_code}>
+					{parse(elements_slot)}
+				</React.Fragment>
+			);
+		}
 
 		// let element = {};
 		// element.tag = e.elements_tag;
@@ -129,14 +143,31 @@ function Widgets({ widgets, hasColumn }) {
 				key: element_code,
 				className: elements_class ? elements_class.join(' ') : '',
 			},
-			<>
+			createCMSElementChild({
+				elements_slot,
+				api_childrens,
+				elements_tag,
+				element_code,
+			})
+		);
+	};
+
+	const createCMSElementChild = ({
+		elements_slot,
+		api_childrens,
+		elements_tag,
+		element_code,
+	}) => {
+		if (elements_tag === 'img') return null;
+		return (
+			<React.Fragment key={`${element_code}_children`}>
 				{elements_slot && elements_slot}
 				{api_childrens &&
 					api_childrens.map((children) => {
 						console.log('Start Recursion');
 						return createCMSElement(children);
 					})}
-			</>
+			</React.Fragment>
 		);
 	};
 
@@ -144,9 +175,16 @@ function Widgets({ widgets, hasColumn }) {
 		if (elements_slot === 'PiCaretCircleRight') return PiCaretCircleRight;
 	};
 
+	const renderCombinedWidgets = ({ ourbusiness_widget, ourbusiness_key }) => {
+		console.log('ourbusiness_widget', ourbusiness_widget);
+		if (ourbusiness_widget.length) {
+			return <OurBusinesses data={ourbusiness_widget} key={ourbusiness_key} />;
+		}
+	};
+
 	return (
-		<>
-			{widgets.map((widget) => {
+		<React.Fragment key={keyWidget}>
+			{widgets.map((widget, index) => {
 				let children = widget.api_childrens;
 				let key = widget.page_section_widget_code;
 
@@ -182,7 +220,7 @@ function Widgets({ widgets, hasColumn }) {
 
 					children.forEach((child) => {
 						if (child.elements_tag === 'video')
-							video = child.elements_attributes;
+							video = child.elements_attributes.src;
 						else if (child.elements_tag === 'div') {
 							child.api_childrens.forEach((element) => {
 								images.push(element.elements_attributes);
@@ -306,7 +344,6 @@ function Widgets({ widgets, hasColumn }) {
 
 							<p>
 								{children[1].api_childrens.map((child) => {
-									console.log(child);
 									if (child.elements_name === 'Hyperlink') {
 										let elementClasses = child.elements_class
 											? child.elements_class.join(' ')
@@ -314,6 +351,7 @@ function Widgets({ widgets, hasColumn }) {
 
 										return (
 											<Link
+												key={child.element_code}
 												className={elementClasses}
 												to={child.elements_attributes.src}>
 												{child.elements_attributes.value}
@@ -375,7 +413,6 @@ function Widgets({ widgets, hasColumn }) {
 				}
 
 				if (widget.widgets_name === 'Video Content') {
-					console.log('video', children);
 					let type = children[0].elements_attributes.type;
 					if (type === 'youtube') {
 						return (
@@ -448,7 +485,6 @@ function Widgets({ widgets, hasColumn }) {
 					let desc = children[3];
 					let link = children[4];
 
-					console.log('type', type);
 					return (
 						<Column key={key}>
 							<div className='business-item'>
@@ -479,7 +515,9 @@ function Widgets({ widgets, hasColumn }) {
 				}
 
 				if (widget.widgets_name === 'PDF Widget') {
-					let files = children[0];
+					let files = children[0].elements_attributes
+						? children[0].elements_attributes.src
+						: '';
 					let title = children[1];
 					// let headingSize = title.elements_class
 					// 	? title.elements_class.join(' ')
@@ -495,18 +533,78 @@ function Widgets({ widgets, hasColumn }) {
 							<PDFWidget
 								// headingSize={headingSize}
 								title={title.elements_slot}
-								// link={'/disclosures/inner'}
+								link={files}
 							/>
 						</Column>
 					);
 				}
+
+				if (widget.widgets_name === 'Slider') {
+					const packaging = [
+						{
+							img: `/images/OurCompany/packaging-1.png`,
+						},
+						{
+							img: `/images/OurCompany/packaging-2.png`,
+						},
+						{
+							img: `/images/OurCompany/packaging-3.png`,
+						},
+					];
+
+					return (
+						<ImageSlider
+							dots={true}
+							type='full'
+							captionPosition='absolute'
+							arrows={false}
+							slides={packaging}
+						/>
+					);
+				}
 				if (widget.widgets_name === 'Custom Widget') {
 					console.log(children);
-					return (
-						<Column key={key}>
-							{children.map((child) => createCMSElement(child))}
-						</Column>
-					);
+					if (children.elements_name !== 'Paragraph')
+						return (
+							<Column key={key}>
+								{children.map((child) => createCMSElement(child))}
+							</Column>
+						);
+					else return <React.Fragment>{parse(children)}</React.Fragment>;
+				}
+
+				if (widget.widgets_name === 'Sustainability Widget') {
+					console.log('sustainability', children);
+					let images = [];
+					images.push(children[0].elements_attributes.src);
+					images.push(children[1].elements_attributes.src);
+					images.push(children[2].elements_attributes.src);
+
+					return <SustainabilitySection images={images} key={key} />;
+				}
+
+				let ourbusiness_widget = [];
+				let ourbusiness_key = `ourbusiness_`;
+
+				if (widget.widgets_name === 'Our Business') {
+					// let img = ;
+					// let title = div[1].;
+					// let description = div[2].;
+					// let link = div[3].;
+					console.log('Our Business', children);
+
+					children.forEach((d) => {
+						ourbusiness_widget.push({
+							img: d.api_childrens[0].elements_attributes,
+							title: d.api_childrens[1].elements_slot,
+							description: d.api_childrens[2].elements_slot,
+							link: d.api_childrens[3].elements_attributes.to,
+						});
+					});
+
+					console.log('ourbusiness_widget', ourbusiness_widget);
+
+					return <OurBusinesses data={ourbusiness_widget} key={key} />;
 				}
 
 				if (widget.widgets_name === 'Our Story Tabs - Test') {
@@ -516,7 +614,11 @@ function Widgets({ widgets, hasColumn }) {
 				if (our_story_tabs.length) {
 					<OurStoryTab />;
 				}
+
+				// if (index === widgets.length - 1) {
+				// 	return renderCombinedWidgets({ ourbusiness_widget, ourbusiness_key });
+				// }
 			})}
-		</>
+		</React.Fragment>
 	);
 }

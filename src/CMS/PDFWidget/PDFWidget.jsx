@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 
 import { PiArrowUpRightBold } from 'react-icons/pi';
+import { Link } from 'react-router-dom';
 import { getColors } from 'src/hooks/use-color';
 
 export default function PDFWidget({
@@ -67,7 +68,13 @@ export default function PDFWidget({
 			whileHover='hover'
 			whileTap='tap'
 			variants={widgetVariants}>
-			{link && <Link to={link} className='link-cover'></Link>}
+			{link && (
+				<Link
+					to={link}
+					target='_blank'
+					rel='noopener noreferrer'
+					className='link-cover'></Link>
+			)}
 
 			<h3 className={`${headingSize} pdf-widget-title`}>
 				{title}

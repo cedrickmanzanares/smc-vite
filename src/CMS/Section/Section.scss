@@ -217,7 +217,14 @@
 	padding-bottom: unset;
 }
 
-.malasakit-container {
+.malasakit-section {
+	text-align: center;
+	color: white;
+	align-items: flex-start;
+	background-image: url('/css_images/Malasakit-bg.png'),
+		linear-gradient(rgb(56, 131, 172), rgb(170, 191, 107), rgb(181, 130, 130));
+	background-size: cover;
+	transform: none;
 	img {
 		display: block;
 		width: 100%;

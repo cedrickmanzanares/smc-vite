@@ -2,20 +2,14 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 
 import { useRef } from 'react';
-import Button from '@/components/button/button';
+import Button from 'src/Components/button/button';
 
-export default function PageCTA() {
+export default function SustainabilitySection({ images, label, link }) {
 	const cta = useRef();
 	const { scrollYProgress } = useScroll({
 		target: cta,
 		offset: ['start end', 'end start'],
 	});
-
-	const images = [
-		'src/images/CTA/cta-1.png',
-		'src/images/CTA/cta-2.png',
-		'src/images/CTA/cta-3.png',
-	];
 
 	let yValues = [
 		useTransform(scrollYProgress, [0, 1], ['0%', `${(0 * 25) / 2}%`]),
@@ -31,16 +25,18 @@ export default function PageCTA() {
 	);
 
 	return (
-		<div className='pageCTA' ref={cta}>
+		<div className='sustainability-section' ref={cta}>
 			<div className='container-fluid-width'>
-				<div className='cta-images'>
+				<div className='sustainability-images'>
 					{images.map((val, index) => {
 						return (
-							<motion.img
+							<motion.div
 								key={`cta_image_${index}`}
-								style={{ zIndex: index, y: yValues[index - 1] }}
-								src={val}
-							/>
+								style={{
+									zIndex: index,
+									y: yValues[index - 1],
+									backgroundImage: `url(${val})`,
+								}}></motion.div>
 						);
 					})}
 					<motion.h2
@@ -52,7 +48,7 @@ export default function PageCTA() {
 						}}>
 						At vero eos et accusamus
 					</motion.h2>
-					<div className='pageCTA-btn'>
+					<div className='sustainability-btn'>
 						<Button href='/' className='btn btn-bordered white' link='/'>
 							Visit our sustainability site
 						</Button>
